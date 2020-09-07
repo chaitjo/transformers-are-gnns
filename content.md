@@ -76,7 +76,7 @@ We can understand the attention mechanism better through the following pipeline:
 
 ### Multi-head Attention mechanism
 
-Getting this dot-product attention mechanism to work proves to be tricky--bad random initializations can de-stabilize the learning process. 
+Getting this straightforward dot-product attention mechanism to work proves to be tricky. Bad random initializations of the learnable weights can de-stabilize the training process. 
 We can overcome this by parallelly performing multiple 'heads' of attention and concatenating the result (with each head now having separate learnable weights):
 
 $$
@@ -112,7 +112,7 @@ $$
 
 > To be honest, I'm not sure what the exact intuition behind the over-parameterized feed-forward sub-layer was. I suppose LayerNorm and scaled dot-products didn't completely solve the issues highlighted, so the big MLP is a sort of hack to re-scale the feature vectors independently of each other.
 >
-> According to [J. Muenchmeyer](https://www.gfz-potsdam.de/en/staff/jannes-muenchmeyer/sec24/), the feed-forward sub-layer ensures that the Transformer is a universal approximator. Thus, projecting to a very high dimensional space, applying a non-linearity, and re-projecting to the original dimension allows the model to represent more functions than maintaining the same dimension across the hidden layer would.
+> According to [Jannes Muenchmeyer](https://www.gfz-potsdam.de/en/staff/jannes-muenchmeyer/sec24/), the feed-forward sub-layer ensures that the Transformer is a universal approximator. Thus, projecting to a very high dimensional space, applying a non-linearity, and re-projecting to the original dimension allows the model to represent more functions than maintaining the same dimension across the hidden layer would.
 
 ---
 
@@ -147,7 +147,7 @@ $$
 h_{i}^{\ell+1} =  \sigma \Big( U^{\ell} h_{i}^{\ell} + \sum_{j \in \mathcal{N}(i)} \left( V^{\ell} h_{j}^{\ell} \right)  \Big),
 $$
 
-where $U^{\ell}, V^{\ell}$ are learnable weight matrices of the GNN layer and $\sigma$ is a non-linearity such as ReLU.
+where $U^{\ell}, V^{\ell}$ are learnable weight matrices of the GNN layer and $\sigma$ is a non-linear function such as ReLU.
 In the example, $\mathcal{N}$(😆) $=$ { 😘, 😎, 😜, 🤩 }.
 
 The summation over the neighbourhood nodes $j \in \mathcal{N}(i)$ can be replaced by other input size-invariant **aggregation functions** such as simple mean/max or something more powerful, such as a weighted sum via an [**attention mechanism**](https://petar-v.com/GAT/).
@@ -193,9 +193,13 @@ Now that we've established a connection between Transformers and GNNs, let me th
 #### Are fully-connected graphs the best input format for NLP?
 
 Before statistical NLP and ML, linguists like Noam Chomsky focused on developing fomal theories of [linguistic structure](https://en.wikipedia.org/wiki/Syntactic_Structures), such as **syntax trees/graphs**.
-[Tree LSTMs](https://arxiv.org/abs/1503.00075) already tried this, but maybe Transformers/GNNs are better architectures for bringing the world of linguistic theory and statistical NLP closer? 
+[Tree LSTMs](https://arxiv.org/abs/1503.00075) already tried this, but maybe Transformers/GNNs are better architectures for bringing the world of linguistic theory and statistical NLP closer? For example, a very recent work from Mila and Stanford explores augmenting pre-trained Transformers such as BERT with syntax trees [[Sachan et al., 2020](https://arxiv.org/abs/2008.09084)].
 
-{{< figure src="syntax-tree.png" title="" width="40%">}}
+<figure>
+  <img src="syntax-tree.png" width="40%" />
+  <figcaption>Source: <a href="https://en.wikipedia.org/wiki/Syntactic_Structures#/media/File:Cgisf-tgg.svg">Wikipedia</a></figcaption>
+</figure>
+
 
 
 #### How to learn long-term dependencies?
@@ -206,11 +210,15 @@ This is simply due to how the number of edges in the graph **scales quadraticall
 The NLP community's perspective on the long sequences and dependencies problem is interesting:
 Making the attention mechanism [sparse](https://openai.com/blog/sparse-transformer/) or [adaptive](https://ai.facebook.com/blog/making-transformer-networks-simpler-and-more-efficient/) in terms of input size, adding [recurrence](https://ai.googleblog.com/2019/01/transformer-xl-unleashing-potential-of.html) or [compression](https://deepmind.com/blog/article/A_new_model_and_dataset_for_long-range_memory) into each layer, 
 and using [Locality Sensitive Hashing](https://www.pragmatic.ml/reformer-deep-dive/) for efficient attention
-are all promising new ideas for better Transformers.
+are all promising new ideas for better Transformers. See Maddison May's [excellent survey](https://www.pragmatic.ml/a-survey-of-methods-for-incorporating-long-term-context/) on long-term context in Transformers for more details. 
 
 It would be interesting to see ideas from the GNN community thrown into the mix, *e.g.*, [Binary Partitioning](https://arxiv.org/abs/1911.04070) for sentence **graph sparsification** seems like another exciting approach.
 
-{{< figure src="long-term-depend.png" title="" width="80%">}}
+<figure>
+  <img src="long-term-depend.png" width="80%" />
+  <figcaption>Source: <a href="https://arxiv.org/abs/1911.04070">Ye et al., 2019</a></figcaption>
+</figure>
+
 
 
 #### Are Transformers learning 'neural syntax'?
@@ -219,10 +227,14 @@ There have been [several](https://pair-code.github.io/interpretability/bert-tree
 The basic premise is that performing attention on all word pairs in a sentence--with the purpose of identifying which pairs are the most interesting--enables Transformers to learn something like a **task-specific syntax**.
 Different heads in the multi-head attention might also be 'looking' at different syntactic properties.
 
-In graph terms, by using GNNs on full graphs, can we recover the most important edges--and what they might entail--from how the GNN performs neighbourhood aggregation at each layer?
+In graph terms, by using GNNs on full graphs, can we [recover the most important edges](https://arxiv.org/abs/2002.04999)--and what they might entail--from how the GNN performs neighbourhood aggregation at each layer?
 I'm [not so convinced](https://arxiv.org/abs/1909.07913) by this view yet.
 
-{{< figure src="attention-heads.png" title="" width="100%">}}
+<figure>
+  <img src="attention-heads.png" width="70%" />
+  <figcaption>Source: <a href="https://arxiv.org/abs/1906.04341">Clark et al., 2019</a></figcaption>
+</figure>
+
 
 
 #### Why multiple heads of attention? Why attention?
@@ -239,7 +251,11 @@ Wouldn't it be nice for Transformers if we didn't have to compute pair-wise comp
 Could Transformers benefit from ditching attention, altogether? Yann Dauphin and collaborators' [recent](https://arxiv.org/abs/1705.03122) [work](https://arxiv.org/abs/1901.10430) suggests an alternative **ConvNet architecture**.
 Transformers, too, might ultimately be doing [something](http://jbcordonnier.com/posts/attention-cnn/) [similar](https://twitter.com/ChrSzegedy/status/1232148457810538496) to ConvNets!
 
-{{< figure src="attention-conv.png" title="" width="100%">}}
+<figure>
+  <img src="attention-conv.png" />
+  <figcaption>Source: <a href="https://arxiv.org/abs/1901.10430">Wu et al., 2019</a></figcaption>
+</figure>
+
 
 
 #### Why is training Transformers so hard?
@@ -252,7 +268,7 @@ But [recent](https://arxiv.org/abs/1906.01787) [results](https://arxiv.org/abs/1
 
 <blockquote class="twitter-tweet"><p lang="en" dir="ltr">I enjoyed reading the new <a href="https://twitter.com/DeepMind?ref_src=twsrc%5Etfw">@DeepMind</a> Transformer paper, but why is training these models such dark magic? &quot;For word-based LM we used 16, 000 warmup steps with 500, 000 decay steps and sacrifice 9,000 goats.&quot;<a href="https://t.co/dP49GTa4ze">https://t.co/dP49GTa4ze</a> <a href="https://t.co/1K3Fx4s3M8">pic.twitter.com/1K3Fx4s3M8</a></p>&mdash; Chaitanya Joshi (@chaitjo) <a href="https://twitter.com/chaitjo/status/1229335421806501888?ref_src=twsrc%5Etfw">February 17, 2020</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>	
 
-At this point I'm ranting, but this makes me sceptical: Do we really need multiple heads of expensive pair-wise attention, overparameterized MLP sub-layers, and complicated learning schedules?
+I know I'm ranting, but this makes me sceptical: Do we really need multiple heads of expensive pair-wise attention, overparameterized MLP sub-layers, and complicated learning schedules?
 
 Do we really need massive models with [massive carbon footprints](https://www.technologyreview.com/s/613630/training-a-single-ai-model-can-emit-as-much-carbon-as-five-cars-in-their-lifetimes/)?
 
@@ -269,15 +285,11 @@ Here's [an excellent talk](https://ipam.wistia.com/medias/1zgl4lq6nh) by Arthur 
 Similarly, DeepMind's [star-studded position paper](https://arxiv.org/abs/1806.01261) introduces the *Graph Networks* framework, unifying all these ideas.
 For a code walkthrough, the DGL team has [a nice tutorial](https://docs.dgl.ai/en/latest/tutorials/models/4_old_wines/7_transformer.html) on seq2seq as a graph problem and building Transformers as GNNs.
 
-**In our next post, we'll be doing the reverse: using GNN architectures as Transformers for NLP (based on the Transformers library by [🤗 HuggingFace](https://github.com/huggingface/transformers)).**
-
-Finally, we wrote [a recent paper]({{<ref "/publication/xu-2019-multi/index.md">}}) applying Transformers to sketch graphs. Do check it out!
-
 ---
 
 #### Updates
 
-The post is also available on [Medium](https://medium.com/@chaitjo/transformers-are-graph-neural-networks-bca9f75412aa?source=friends_link&sk=c54de873b2cec3db70166a6cf0b41d3e), and has been translated to [Chinese](https://mp.weixin.qq.com/s/DABEcNf1hHahlZFMttiT2g) and [Russian](https://habr.com/ru/post/491576/).
+The post initially appeared on the [NTU Graph Deep Learning lab website](https://graphdeeplearning.github.io/post/transformers-are-gnns/) and [Medium](https://medium.com/@chaitjo/transformers-are-graph-neural-networks-bca9f75412aa?source=friends_link&sk=c54de873b2cec3db70166a6cf0b41d3e), and has also been translated to [Chinese](https://mp.weixin.qq.com/s/DABEcNf1hHahlZFMttiT2g) and [Russian](https://habr.com/ru/post/491576/).
 Do join the discussion on [Twitter](https://twitter.com/chaitjo/status/1233220586358181888?s=20), [Reddit](https://www.reddit.com/r/MachineLearning/comments/fb86mo/d_transformers_are_graph_neural_networks_blog/) or [HackerNews](https://news.ycombinator.com/item?id=22518263)!
 
 <blockquote class="twitter-tweet"><p lang="en" dir="ltr">Transformers are a special case of Graph Neural Networks. This may be obvious to some, but the following blog post does a good job at explaining these important concepts. <a href="https://t.co/H8LT2F7LqC">https://t.co/H8LT2F7LqC</a></p>&mdash; Oriol Vinyals (@OriolVinyalsML) <a href="https://twitter.com/OriolVinyalsML/status/1233783593626951681?ref_src=twsrc%5Etfw">February 29, 2020</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
