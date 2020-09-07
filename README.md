@@ -212,7 +212,7 @@ Making the attention mechanism [sparse](https://openai.com/blog/sparse-transform
 and using [Locality Sensitive Hashing](https://www.pragmatic.ml/reformer-deep-dive/) for efficient attention
 are all promising new ideas for better Transformers. See Maddison May's [excellent survey](https://www.pragmatic.ml/a-survey-of-methods-for-incorporating-long-term-context/) on long-term context in Transformers for more details. 
 
-It would be interesting to see ideas from the GNN community thrown into the mix, *e.g.*, [Binary Partitioning](https://arxiv.org/abs/1911.04070) for sentence **graph sparsification** seems like another exciting approach.
+It would be interesting to see ideas from the GNN community thrown into the mix, *e.g.*, [Binary Partitioning](https://arxiv.org/abs/1911.04070) for sentence **graph sparsification** seems like another exciting approach. BP-Transformers recursively sub-divide sentences into two until they can construct a heirarchical binary tree from the sentence tokens. This structural inductive bias helps the model process longer text sequences in a memory-efficient manner.
 
 <figure>
   <img src="long-term-depend.png" width="80%" />
